@@ -9,7 +9,6 @@ A Discord bot built with **C# / .NET 10** focused on music playback and server i
 - **Music playback** — Search and play songs or full playlists from YouTube via slash commands
 - **Interactive controls** — Skip, pause/resume, shuffle, loop and stop buttons on the now-playing message
 - **Auto-disconnect** — Bot leaves the voice channel automatically when it's empty
-- **GIF reactions** — React to messages with a random GIF from a curated pool (message context command)
 - **Bot info** — Embed showing runtime, memory usage, uptime and framework via `/info`
 - **Dynamic presence** — Status updates automatically as the bot joins or leaves servers
 
@@ -33,7 +32,6 @@ A Discord bot built with **C# / .NET 10** focused on music playback and server i
 ├── Config/           # Configuration models
 ├── Events/           # Discord gateway event handlers
 ├── Player/           # Custom Lavalink player with queue support
-├── Repository/       # GIF data access layer
 ├── Services/         # Bot presence / activity service
 └── Program.cs        # Entry point and DI setup
 ```
@@ -64,26 +62,12 @@ Fill in your values in `appsettings.json` (or create an `appsettings.Production.
     "TimeoutSeconds": 10
   },
   "Bot": {
-    "OwnerId": "YOUR_DISCORD_USER_ID",
     "AvatarFileName": "avatar.gif"
-  },
-  "Gifs": {
-    "Fallback": "https://example.com/fallback.gif"
   }
 }
 ```
 
 > ⚠️ Never commit files with real tokens. Production settings are gitignored.
-
-Add a `gifs.json` file in the output directory with a JSON array of GIF URLs:
-
-```json
-[
-  "https://example.com/gif1.gif",
-  "https://example.com/gif2.gif"
-]
-```
-
 
 ---
 
@@ -94,9 +78,6 @@ Add a `gifs.json` file in the output directory with a JSON array of GIF URLs:
 | `/play <query>` | Slash | Play a song or playlist from YouTube |
 | `/dc` | Slash | Disconnect the bot from voice |
 | `/info` | Slash | Show bot technical info |
-| `Reagir com GIF` | Message | React to a message with a random GIF |
-| `Remover GIF` | Message | Remove a GIF from the pool *(owner only)* |
-
 ---
 
 ## 📜 License
