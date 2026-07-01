@@ -1,5 +1,4 @@
-﻿using DiscordBot.Repository;
-using DiscordBot.Services;
+﻿using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetCord;
@@ -9,7 +8,7 @@ using NetCord.Rest;
 
 namespace DiscordBot.Events;
 
-public class Ready(ActivityService activityService, GifRepository gifRepository,RestClient restClient, ILogger<Ready> logger, IConfiguration config) : IReadyGatewayHandler {
+public class Ready(ActivityService activityService, RestClient restClient, ILogger<Ready> logger, IConfiguration config) : IReadyGatewayHandler {
     public async ValueTask HandleAsync(ReadyEventArgs args) {
         logger.LogInformation("Bot está rodando! Logado como {Username}#{Discriminator} | Servidores: {GuildCount}",
             args.User.Username,
@@ -17,8 +16,6 @@ public class Ready(ActivityService activityService, GifRepository gifRepository,
             args.GuildIds.Count);
 
         await activityService.InitializeAsync(args.GuildIds);
-
-        await gifRepository.Load();
         
         await UpdateAvatarAsync();
     }

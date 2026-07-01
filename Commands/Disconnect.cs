@@ -11,17 +11,28 @@ public class Disconnect(IAudioService audioService) : ApplicationCommandModule<S
     public async Task DisconnectAsync() {
         await RespondAsync(InteractionCallback.DeferredMessage(flags: MessageFlags.Ephemeral));
 
-        ulong? voiceChannelId;
+        if (Context.Guild is null) {
+            await FollowupAsync("Este comando só pode ser usado dentro de um servidor");
+            return;
+        }
+
+        ulong voiceChannelId;
 
         try {
             var voiceState = await Context.Guild.GetUserVoiceStateAsync(Context.User.Id);
-            voiceChannelId = voiceState?.ChannelId;
+
+            if (voiceState?.ChannelId is null) {
+                await FollowupAsync("Você não está em um canal de voz");
+                return;
+            }
+
+            voiceChannelId = voiceState.ChannelId.Value;
         } catch {
             await FollowupAsync("Você não está em um canal de voz");
             return;
         }
 
-        if (Context.Guild is not null && !audioService.Players.HasPlayer(Context.Guild.Id)) {
+        if (!audioService.Players.HasPlayer(Context.Guild.Id)) {
             await FollowupAsync("Bot não está conectado");
             return;
         }
@@ -33,12 +44,24 @@ public class Disconnect(IAudioService audioService) : ApplicationCommandModule<S
             return;
         }
 
+        if (player.IsGhost) {
+            await player.DisposeAsync();
+            await FollowupAsync("Player fantasma detectado e desconectado com sucesso");
+            return;
+        }
+
         if (player.VoiceChannelId != voiceChannelId) {
             await FollowupAsync("Você precisa estar no mesmo canal que o bot");
             return;
         }
 
-        await player.DisposeAsync();
-        await FollowupAsync("Desconectado com sucesso");
+        await player.Lock.WaitAsync();
+
+        try {
+            await player.DisposeAsync();
+            await FollowupAsync("Desconectado com sucesso");
+        } finally {
+            player.Lock.Release();
+        }
     }
 }

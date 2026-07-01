@@ -1,5 +1,4 @@
 ﻿using DiscordBot.Config;
-using DiscordBot.Repository;
 using DiscordBot.Services;
 using Microsoft.Extensions.Hosting;
 using NetCord;
@@ -39,7 +38,6 @@ try {
         .ConfigureServices((ctx, services) => {
             services.AddGatewayHandlers(typeof(Program).Assembly);
             services.AddSingleton<ActivityService>();
-            services.AddSingleton<GifRepository>();
             services.AddLavalink();
 
             services.ConfigureLavalink(config => {

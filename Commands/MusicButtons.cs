@@ -20,6 +20,16 @@ public class MusicButtons(IAudioService audioService) : ComponentInteractionModu
             return null;
         }
 
+        if (player.IsGhost) {
+            await player.DisposeAsync();
+
+            await RespondAsync(InteractionCallback.Message(new InteractionMessageProperties()
+                .WithContent("O player estava desconectado, então foi encerrado. Use /play para começar de novo")
+                .WithFlags(MessageFlags.Ephemeral)));
+
+            return null;
+        }
+
         if (player.CurrentMessageId != Context.Message.Id) {
             await RespondAsync(InteractionCallback.Message(new InteractionMessageProperties()
                 .WithContent("Estes controles estão desatualizados")

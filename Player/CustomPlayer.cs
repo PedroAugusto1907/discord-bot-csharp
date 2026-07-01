@@ -3,11 +3,16 @@ using Lavalink4NET.Players.Queued;
 using Lavalink4NET.Protocol.Payloads.Events;
 using Microsoft.Extensions.Logging;
 using NetCord;
+using NetCord.Gateway;
 using NetCord.Rest;
 
 namespace DiscordBot.Player;
 
-public class CustomPlayer(IPlayerProperties<CustomPlayer, CustomPlayerOptions> properties, RestClient restClient, ILogger<CustomPlayer> logger) : QueuedLavalinkPlayer(properties) {
+public class CustomPlayer(
+    IPlayerProperties<CustomPlayer, CustomPlayerOptions> properties,
+    RestClient restClient,
+    GatewayClient gatewayClient,
+    ILogger<CustomPlayer> logger) : QueuedLavalinkPlayer(properties) {
     private ulong _textChannelId = properties.Options.Value.TextChannelId;
 
     public ulong? CurrentMessageId { get; private set; }
@@ -20,6 +25,21 @@ public class CustomPlayer(IPlayerProperties<CustomPlayer, CustomPlayerOptions> p
 
     private int _disposedFlag = 0;
     public bool IsDisposed => _disposedFlag == 1;
+    
+    public bool IsGhost {
+        get {
+            if (State == PlayerState.Destroyed || IsDisposed) return true;
+
+            if (!gatewayClient.Cache.Guilds.TryGetValue(GuildId, out var guild)) return true;
+
+            var botId = gatewayClient.Cache.User?.Id;
+            if (botId is null) return true;
+            
+            if (!guild.VoiceStates.TryGetValue(botId.Value, out var botVoiceState)) return true;
+
+            return botVoiceState.ChannelId is null;
+        }
+    }
 
     protected override async ValueTask NotifyTrackStartedAsync(ITrackQueueItem trackItem, CancellationToken cancellationToken = default) {
         await base.NotifyTrackStartedAsync(trackItem, cancellationToken);
